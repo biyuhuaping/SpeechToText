@@ -6,28 +6,14 @@
 //
 
 #import "ViewController.h"
-#import <Speech/Speech.h>
+#import "ZBSpeech.h"
 
-@interface ViewController ()<SFSpeechRecognizerDelegate>
+@interface ViewController ()<ZBSpeechDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextView *textView;
 @property (weak, nonatomic) IBOutlet UIButton *startBtn;
 @property (weak, nonatomic) IBOutlet UILabel *tipLabel;
-
-// 创建语音识别器，指定语音识别的语言环境 locale ,将来会转化为什么语言，这里是使用的当前区域，那肯定就是简体汉语
-@property (nonatomic, strong) SFSpeechRecognizer *speechRecognizer;
-
-// 语音识别任务，可监控识别进度。通过他可以取消或终止当前的语音识别任务
-@property (nonatomic, strong) SFSpeechRecognitionTask *recognitionTask;
-
-// 发起语音识别请求，为语音识别器指定一个音频输入源，这里是在音频缓冲器中提供的识别语音。
-// 除 SFSpeechAudioBufferRecognitionRequest 之外还包括：
-// SFSpeechRecognitionRequest  从音频源识别语音的请求。
-// SFSpeechURLRecognitionRequest 在录制的音频文件中识别语音的请求。
-@property (nonatomic, strong) SFSpeechAudioBufferRecognitionRequest *recognitionRequest;
-
-// 语音引擎，负责提供录音输入
-@property (nonatomic, strong) AVAudioEngine *audioEngine;
+@property (nonatomic ,strong) IBOutlet UIImageView *imageAnimation;
 
 @end
 
@@ -35,41 +21,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-//    self.speechRecognizer = [[SFSpeechRecognizer alloc] initWithLocale:[NSLocale currentLocale]];
-    self.speechRecognizer = [[SFSpeechRecognizer alloc] initWithLocale:[NSLocale localeWithLocaleIdentifier:@"zh-CN"]];
-    self.speechRecognizer.delegate = self;
-//    NSLog(@"语音识别器支持的区域：%@",[SFSpeechRecognizer supportedLocales]);
-//    NSLog(@"语音识别器支持的区域：%@",self.speechRecognizer.locale);
-//    NSLocale *locale  = self.speechRecognizer.locale;
-    
-    self.audioEngine = [[AVAudioEngine alloc] init];
-    self.startBtn.enabled = NO;
-    [self.startBtn setTitleColor:UIColor.grayColor forState:UIControlStateNormal];
-
-    //  在进行语音识别之前，你必须获得用户的相应授权，因为语音识别并不是在iOS 设备本地进行识别，而是在苹果的伺服器上进行识别的。所有的语音数据都需要传给苹果的后台服务器进行处理。因此必须得到用户的授权,这个方法并不是在主线程运行的。
-    [SFSpeechRecognizer requestAuthorization:^(SFSpeechRecognizerAuthorizationStatus status) {
-        switch (status) {
-            case SFSpeechRecognizerAuthorizationStatusNotDetermined: {//用户未决定
-                NSString *text = @"权限提示：用户未决定";
-                [self setTioLabelText:text withBtnEnable:NO];}
-                break;
-            case SFSpeechRecognizerAuthorizationStatusDenied: {//拒绝
-                NSString *text = @"权限提示：用户拒绝";
-                [self setTioLabelText:text withBtnEnable:NO];}
-                break;
-            case SFSpeechRecognizerAuthorizationStatusRestricted: {//不支持
-                NSString *text = @"权限提示：用户的设备不支持";
-                [self setTioLabelText:text withBtnEnable:NO];}
-                break;
-            case SFSpeechRecognizerAuthorizationStatusAuthorized: {//允许
-                NSString *text = @"权限提示：用户允许";
-                [self setTioLabelText:text withBtnEnable:YES];
-            }
-                break;
-            default:
-                break;
-        }
-    }];
+    NSMutableArray *images = [NSMutableArray array];
+    for (int i = 0; i < 3; i++) {
+        [images addObject:[UIImage imageNamed:[NSString stringWithFormat:@"speech%d",i]]];
+    }
+    self.imageAnimation.animationImages = images;
+    self.imageAnimation.animationDuration = 0.4;
+    [ZBSpeech shareSpeech].delegate = self;
 }
 
 - (void)setTioLabelText:(NSString *)text withBtnEnable:(BOOL)enAble{
@@ -80,113 +38,54 @@
     });
 }
 
-- (void)startRecordingPersonSpeech{
-    // 检查 recognitionTask 任务是否处于运行状态。如果是，取消任务开始新的任务
-    if (self.recognitionTask != nil) {
-        // 取消当前语音识别任务
-        [self.recognitionTask cancel];
-        NSLog(@"语音识别任务的当前状态 : %ld",(long)self.recognitionTask.state);
-        self.recognitionTask = nil;
-    }
-    
-    // 建立一个AVAudioSession 用于录音
-    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-    // category 设置为 record,录音
-    [audioSession setCategory:AVAudioSessionCategoryRecord error:nil];
-    // mode 设置为 measurement
-    [audioSession setMode:AVAudioSessionModeMeasurement error:nil];
-    // 开启 audioSession
-    [audioSession setActive:YES error:nil];
-    
-    // 初始化RecognitionRequest，在后边我们会用它将录音数据转发给苹果服务器
-    self.recognitionRequest = [[SFSpeechAudioBufferRecognitionRequest alloc] init];
-    
-    // 检查 iPhone 是否有有效的录音设备
-    AVAudioInputNode *inputNode = self.audioEngine.inputNode;
-    if (!inputNode) {
-        self.tipLabel.text = @"无效的录音设备";
-    }
-
-    // 在用户说话的同时，将识别结果分批次返回
-    self.recognitionRequest.shouldReportPartialResults = YES;
-    
-    // 使用recognitionTask方法开始识别。
-    self.recognitionTask = [self.speechRecognizer recognitionTaskWithRequest:self.recognitionRequest resultHandler:^(SFSpeechRecognitionResult * _Nullable result, NSError * _Nullable error) {
-        // 用于检查识别是否结束
-        BOOL isFinal = NO;
-        if (result != nil) {
-            // 将 textView.text 设置为 result 的最佳音译
-            self.textView.text = result.bestTranscription.formattedString;
-            // 如果 result 是最终，将 isFinal 设置为 true
-            isFinal = result.isFinal;
-        }
-        
-        // 如果没有错误发生，或者 result 已经结束，停止audioEngine 录音，终止 recognitionRequest 和 recognitionTask
-        if (error != nil || isFinal) {
-            [self.audioEngine stop];
-            [inputNode removeTapOnBus:0];
-            
-            self.recognitionRequest = nil;
-            self.recognitionTask = nil;
-            
-            // 开始录音按钮可用
-            self.startBtn.enabled = YES;
-            [self.startBtn setTitleColor:UIColor.blueColor forState:UIControlStateNormal];
-        }
-    }];
-    
-    // 向recognitionRequest加入一个音频输入
-    AVAudioFormat *recordingFormat = [inputNode outputFormatForBus:0];
-    [inputNode installTapOnBus:0 bufferSize:1024 format:recordingFormat block:^(AVAudioPCMBuffer * _Nonnull buffer, AVAudioTime * _Nonnull when) {
-        [self.recognitionRequest appendAudioPCMBuffer:buffer];
-    }];
-    
-    [self.audioEngine prepare];
-    [self.audioEngine startAndReturnError:nil];
-    self.textView.text = @"请讲话...";
-}
-
 // 开始 / 结束
 - (IBAction)startBtnClick:(id)sender {
-    if (self.audioEngine.isRunning) {
-        [self stopRecognize];
+    [[UIApplication sharedApplication].keyWindow endEditing:YES];
+    if ([self.startBtn.titleLabel.text isEqualToString:@"结束"]) {
+        //停止听写
+        [[ZBSpeech shareSpeech] stopRecognize];
+        [self.startBtn setTitle:@"开始" forState:UIControlStateNormal];
     }else{
-        [self startRecognizer];
+        //启动听写
+        [[ZBSpeech shareSpeech] startRecognize];
+        [self.startBtn setTitle:@"结束" forState:UIControlStateNormal];
     }
 }
 
-//启动听写
-- (void)startRecognizer{
-    [self startRecordingPersonSpeech];
-    [self.startBtn setTitle:@"结束" forState:UIControlStateNormal];
+#pragma mark - ZBSpeechDelegate
+/// 听写结束回调
+- (void)onResults:(NSString *)results isLast:(BOOL)isLast{
+    if (isLast){
+        NSLog(@"isLast:%d",isLast);
+    }
+    self.textView.text = results;
 }
 
-//停止听写
-- (void)stopRecognize{
-    // 取消当前语音识别任务
-    [self.recognitionTask cancel];
-    self.recognitionTask = nil;
-    // 停止录音
-    [self.audioEngine stop];
-    // 表示音频源已完成，并且不会再将音频附加到识别请求。
-    [self.recognitionRequest endAudio];
-    
-    self.textView.text = @"";
-    self.startBtn.enabled = NO;
-    [self.startBtn setTitleColor:UIColor.grayColor forState:UIControlStateNormal];
-    [self.startBtn setTitle:@"开始" forState:UIControlStateNormal];
+/// 提示回调
+- (void)onTips:(NSString *)tipsStr{
+    self.tipLabel.text = tipsStr;
+}
+
+/// 开始录音回调
+- (void)onBeginOfSpeech{
+    [self.imageAnimation startAnimating];
+}
+
+/// 停止录音回调
+- (void)onEndOfSpeech{
+    [self.imageAnimation stopAnimating];
 }
 
 //在创建语音识别任务时，我们首先得确保语音识别的可用性，需要实现delegate 方法。如果语音识别不可用，或是改变了状态，应随之设置 按钮的enable
-- (void)speechRecognizer:(SFSpeechRecognizer *)speechRecognizer availabilityDidChange:(BOOL)available{
-    if (available) {
-        self.startBtn.enabled = YES;
-        [self.startBtn setTitleColor:UIColor.blueColor forState:UIControlStateNormal];
-    }else{
-        self.startBtn.enabled = NO;
-        [self.startBtn setTitleColor:UIColor.grayColor forState:UIControlStateNormal];
-    }
-}
+//- (void)speechRecognizer:(SFSpeechRecognizer *)speechRecognizer availabilityDidChange:(BOOL)available{
+//    if (available) {
+//        self.startBtn.enabled = YES;
+//        [self.startBtn setTitleColor:UIColor.blueColor forState:UIControlStateNormal];
+//    }else{
+//        self.startBtn.enabled = NO;
+//        [self.startBtn setTitleColor:UIColor.grayColor forState:UIControlStateNormal];
+//    }
+//}
 
 @end
 

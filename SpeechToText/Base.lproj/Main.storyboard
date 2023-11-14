@@ -44,6 +44,9 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DU8-rk-O9Q">
+                                <rect key="frame" x="0.0" y="449" width="375" height="141"/>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -54,11 +57,15 @@
                             <constraint firstItem="Oc5-Bn-0nA" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="JSW-VR-6oA"/>
                             <constraint firstItem="Oc5-Bn-0nA" firstAttribute="top" secondItem="ePB-pE-lA6" secondAttribute="bottom" constant="100" id="T3q-EN-NXL"/>
                             <constraint firstItem="ePB-pE-lA6" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Xk0-Tl-KuM"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="DU8-rk-O9Q" secondAttribute="bottom" constant="70" id="mdp-w4-3tY"/>
                             <constraint firstItem="BIe-fp-KpX" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="40" id="sB7-cV-NlC"/>
+                            <constraint firstItem="DU8-rk-O9Q" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="w8L-fP-Y3t"/>
+                            <constraint firstItem="DU8-rk-O9Q" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="wVb-2t-zd4"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Oc5-Bn-0nA" secondAttribute="trailing" constant="20" id="zfC-2b-Cmu"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="imageAnimation" destination="DU8-rk-O9Q" id="amb-5B-NFO"/>
                         <outlet property="startBtn" destination="ePB-pE-lA6" id="Osw-vc-oig"/>
                         <outlet property="textView" destination="BIe-fp-KpX" id="Pgn-0G-gcg"/>
                         <outlet property="tipLabel" destination="Oc5-Bn-0nA" id="8Me-VW-cIP"/>
@@ -66,7 +73,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="138" y="-31"/>
+            <point key="canvasLocation" x="136.80000000000001" y="-31.03448275862069"/>
         </scene>
     </scenes>
     <resources>

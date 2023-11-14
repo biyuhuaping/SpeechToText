@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		39A12FD32B0388D400243D06 /* ZBSpeech.m in Sources */ = {isa = PBXBuildFile; fileRef = 39A12FD22B0388D400243D06 /* ZBSpeech.m */; };
 		39CBD8DA2AFE070C008DBC1A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 39CBD8D92AFE070C008DBC1A /* AppDelegate.m */; };
 		39CBD8DD2AFE070C008DBC1A /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 39CBD8DC2AFE070C008DBC1A /* SceneDelegate.m */; };
 		39CBD8E02AFE070C008DBC1A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 39CBD8DF2AFE070C008DBC1A /* ViewController.m */; };
@@ -17,6 +18,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		39A12FD12B0388D400243D06 /* ZBSpeech.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZBSpeech.h; sourceTree = "<group>"; };
+		39A12FD22B0388D400243D06 /* ZBSpeech.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZBSpeech.m; sourceTree = "<group>"; };
 		39CBD8D52AFE070C008DBC1A /* SpeechToText.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpeechToText.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		39CBD8D82AFE070C008DBC1A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		39CBD8D92AFE070C008DBC1A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -67,6 +70,8 @@
 				39CBD8DC2AFE070C008DBC1A /* SceneDelegate.m */,
 				39CBD8DE2AFE070C008DBC1A /* ViewController.h */,
 				39CBD8DF2AFE070C008DBC1A /* ViewController.m */,
+				39A12FD12B0388D400243D06 /* ZBSpeech.h */,
+				39A12FD22B0388D400243D06 /* ZBSpeech.m */,
 				39CBD8E12AFE070C008DBC1A /* Main.storyboard */,
 				39CBD8E42AFE070E008DBC1A /* Assets.xcassets */,
 				39CBD8E62AFE070E008DBC1A /* LaunchScreen.storyboard */,
@@ -146,6 +151,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				39A12FD32B0388D400243D06 /* ZBSpeech.m in Sources */,
 				39CBD8E02AFE070C008DBC1A /* ViewController.m in Sources */,
 				39CBD8DA2AFE070C008DBC1A /* AppDelegate.m in Sources */,
 				39CBD8EB2AFE070E008DBC1A /* main.m in Sources */,
