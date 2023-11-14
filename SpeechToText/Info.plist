@@ -21,5 +21,9 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>当你按下 开始 按钮，我们将使用麦克风进行录音</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>当你按下 开始 按钮，我们将使用麦克风进行录音</string>
 </dict>
 </plist>
